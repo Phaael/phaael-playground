@@ -37,5 +37,7 @@ func addAccountsRoute(router *gin.Engine) {
 	}
 
 	router.GET("/accounts/:accountId", accountsHandler.GetAccountInfo)
+	router.POST("/accounts", accountsHandler.CreateAccount)
+	router.POST("/transactions", accountsHandler.CreateTransaction)
 
 }
