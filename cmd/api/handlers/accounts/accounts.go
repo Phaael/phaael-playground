@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,8 @@ type Handler struct {
 	TransactionsService transactions.Service
 }
 
+type OperationType int64
+
 func (handler *Handler) GetAccountInfo(c *gin.Context) {
 	// Validate accountId
 	accountID, err := strconv.ParseInt(c.Param("accountId"), 10, 64)
@@ -20,9 +23,13 @@ func (handler *Handler) GetAccountInfo(c *gin.Context) {
 		return
 	}
 
-	accountInfo, err := handler.TransactionsService.GetAccountInfo(accountID)
+	accountInfo, errAccount := handler.TransactionsService.GetAccountInfo(accountID)
+	if errAccount != nil {
+		c.JSON(errAccount.Status, errAccount)
+		return
+	}
 
-	c.JSON(http.StatusOK, accountInfo)
+	c.JSON(http.StatusOK, &accountInfo)
 }
 
 func (handler *Handler) CreateAccount(c *gin.Context) {
@@ -34,9 +41,9 @@ func (handler *Handler) CreateAccount(c *gin.Context) {
 		return
 	}
 
-	accountCreated, err := handler.TransactionsService.CreateAccount(accountData)
-	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+	accountCreated, errAccount := handler.TransactionsService.CreateAccount(accountData)
+	if errAccount != nil {
+		c.JSON(errAccount.Status, errAccount)
 		return
 	}
 
@@ -48,15 +55,32 @@ func (handler *Handler) CreateTransaction(c *gin.Context) {
 	bindErr := c.BindJSON(&transactionData)
 
 	if bindErr != nil {
-		c.String(http.StatusBadRequest, bindErr.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": bindErr.Error(),
+		})
 		return
 	}
 
-	err := handler.TransactionsService.CreateTransaction(transactionData)
-	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+	ot := transactions.OperationType(transactionData.OperationTypeId)
+	if errOtValid := ot.IsValid(); errOtValid != nil {
+		c.JSON(http.StatusBadRequest, errOtValid.Error())
+		return
+	}
+
+	errTransaction := handler.TransactionsService.CreateTransaction(transactionData)
+	if errTransaction != nil {
+		c.JSON(errTransaction.Status, errTransaction)
 		return
 	}
 
 	c.JSON(http.StatusOK, "ok")
+}
+
+func (ot OperationType) IsValid() error {
+	switch ot {
+	case 1, 2, 3, 4:
+		return nil
+	}
+	return errors.New("Invalid operation_type_id")
 }

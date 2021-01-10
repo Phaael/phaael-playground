@@ -27,20 +27,21 @@ func dbOpenConnection(cnnString string) {
 	}
 
 	if DbError = DB.Ping(); DbError != nil {
-		log.Panicf("Cannot ping the DB connection. %v(MISSING)", DbError)
+		log.Panicf("Cannot ping the DB connection. %v(MISSING)", DbError.Error())
 	}
 
 	DB.SetMaxIdleConns(50)
 
 }
 
-func getDatabasePath(DbUser, DbPass, DbHost, DbName string) string {
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true", DbUser, DbPass, DbHost, DbName)
+func getDatabasePath(DbUser, DbPass, DbHost, DbName, DBPort string) string {
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", DbUser, DbPass, DbHost, DBPort, DbName)
+	fmt.Println(connectionString)
 	return connectionString
 }
 
 func (repo *RepositoryImpl) Init() {
-	cnn := getDatabasePath(config.DbUserName, config.PassDB, config.DBHost, config.DataBaseName)
+	cnn := getDatabasePath(config.DbUserName, config.PassDB, config.DBHost, config.DataBaseName, config.DBPort)
 	dbOpenConnection(cnn)
 }
 

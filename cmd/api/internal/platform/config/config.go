@@ -5,11 +5,13 @@ var (
 	DBHost       string
 	DbUserName   string
 	PassDB       string
+	DBPort       string
 )
 
 func init() {
-	DataBaseName = ""
-	DBHost = ""
-	DbUserName = ""
-	PassDB = ""
+	DataBaseName = "appdb"
+	DBHost = "mysql"
+	DbUserName = "phaael"
+	PassDB = "123456"
+	DBPort = "3306"
 }

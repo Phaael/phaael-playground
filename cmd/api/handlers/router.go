@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/phaael/phaael-playground/cmd/api/handlers/accounts"
+	"github.com/phaael/phaael-playground/cmd/api/internal/platform/mysql"
 	"github.com/phaael/phaael-playground/cmd/api/internal/transactions"
 )
 
@@ -17,15 +18,15 @@ func MapURL(router *gin.Engine) {
 }
 
 func addAccountsRoute(router *gin.Engine) {
-	// mysqlImpl := mysql.RepositoryImpl{}
-	// mysqlImpl.Init()
+	mysqlImpl := mysql.RepositoryImpl{}
+	mysqlImpl.Init()
 
-	// mysqlServ := mysql.ServiceImpl{
-	// 	Repository: &mysqlImpl,
-	// }
+	mysqlServ := mysql.ServiceImpl{
+		Repository: &mysqlImpl,
+	}
 
 	transactionsImpl := transactions.RepositoryImpl{
-		//MysqlService: &mysqlServ,
+		MysqlService: &mysqlServ,
 	}
 
 	transactionsServ := transactions.ServiceImpl{
