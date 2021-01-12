@@ -47,7 +47,7 @@ func (handler *Handler) CreateAccount(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, accountCreated)
+	c.JSON(http.StatusCreated, accountCreated)
 }
 
 func (handler *Handler) CreateTransaction(c *gin.Context) {
@@ -74,7 +74,7 @@ func (handler *Handler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "ok")
+	c.JSON(http.StatusCreated, "created")
 }
 
 func (ot OperationType) IsValid() error {
