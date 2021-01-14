@@ -8,21 +8,35 @@ services:
     image: mysql:8.0  
     container_name: mysql
     ports: 
-      - "6612:6612"
-    # networks: 
-    #   - xxxxx-xxxxxxx
+      - "3306:3306"
+    networks: 
+      - app-network
     command: 
       --lower_case_table_names=0     
     environment:
+        MYSQL_ROOT_HOST: mysql 
         MYSQL_ROOT_PASSWORD: 123456
         MYSQL_DATABASE: appdb
         MYSQL_USER: phaael
         MYSQL_PASSWORD: 123456
+    
   
   app:
       restart: always
       build:
         dockerfile: ./docker/app.dockerfile
-        context: . 
+        context: .
+      image: phaael/app   
+      container_name: app
       ports: 
           - 8080:8080
+      networks: 
+        - app-network    
+      depends_on:
+          - mysql
+      links: 
+          - mysql:mysql         
+
+networks: 
+  app-network:
+    driver: bridge        

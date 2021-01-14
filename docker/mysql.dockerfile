@@ -1,3 +1,3 @@
 FROM mysql:8
 COPY ./script/ /docker-entrypoint-initdb.d/
-EXPOSE 6612
+EXPOSE 3306
