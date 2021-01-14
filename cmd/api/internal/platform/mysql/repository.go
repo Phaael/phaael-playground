@@ -36,7 +36,6 @@ func dbOpenConnection(cnnString string) {
 
 func getDatabasePath(DbUser, DbPass, DbHost, DbName, DBPort string) string {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", DbUser, DbPass, DbHost, DBPort, DbName)
-	fmt.Println(connectionString)
 	return connectionString
 }
 
@@ -53,6 +52,12 @@ func (repo *RepositoryImpl) Select(query string, args []interface{}) (*sql.Rows,
 
 // need to receive the params query = ".... with prepared statement", vals := []interface{}{1, 2}
 func (repo *RepositoryImpl) Insert(query string, args []interface{}) (sql.Result, error) {
+	result, err := DB.Exec(query, args...)
+	return result, err
+}
+
+// need to receive the params query = ".... with prepared statement", vals := []interface{}{1, 2}
+func (repo *RepositoryImpl) Delete(query string, args []interface{}) (sql.Result, error) {
 	result, err := DB.Exec(query, args...)
 	return result, err
 }

@@ -2,8 +2,10 @@ package accounts_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -23,6 +25,24 @@ func TestGetAccountWithAccountIdInvalid(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request, _ := http.NewRequest("GET", "/accounts/invalid", nil)
+	router.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusBadRequest, response.Code, "Response status must be 400")
+}
+
+func TestCreateAccountWithDocumentNumberInvalid(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	handler := accounts.Handler{}
+
+	router.POST("/accounts", handler.CreateAccount)
+
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequestWithContext(context.Background(), "POST",
+		"/accounts",
+		strings.NewReader(`{
+			"document_number": "xpto"
+		}`))
 	router.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusBadRequest, response.Code, "Response status must be 400")
@@ -243,8 +263,6 @@ func TestCreateTransactionOk(t *testing.T) {
 	router.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusCreated, response.Code, "Response status must be 201")
-	assert.Contains(t, response.Body.String(), "created", "Response must be created")
-
 }
 
 type TransactionsServiceMock struct{}
@@ -255,30 +273,36 @@ func (a *TransactionsServiceMock) GetAccountInfo(accountId int64) (*transactions
 		return nil, &err
 	}
 
-	accountInfo := transactions.AccountData{AccountID: 1223456, DocumentNumber: "XPTO"}
+	accountInfo := transactions.AccountData{AccountID: 1223456, DocumentNumber: int64(2222)}
 	return &accountInfo, nil
 }
 
 func (a *TransactionsServiceMock) CreateAccount(account transactions.NewAccount) (*transactions.AccountData, *errors.ApiErrorResponse) {
-	if account.DocumentNumber == "1212" {
+	strDocNumber := fmt.Sprintf("%v", account.DocumentNumber)
+	docNumber, _ := strconv.ParseInt(strDocNumber, 10, 64)
+
+	if docNumber == 1212 {
 		err := errors.GetError(500, "Internal error")
 		return nil, &err
 	}
 
-	accountInfo := transactions.AccountData{AccountID: 1223456, DocumentNumber: "1212"}
+	accountInfo := transactions.AccountData{AccountID: 1223456, DocumentNumber: int64(1212)}
 	return &accountInfo, nil
 }
 
-func (a *TransactionsServiceMock) CreateTransaction(transaction transactions.NewTransaction) *errors.ApiErrorResponse {
+func (a *TransactionsServiceMock) CreateTransaction(transaction transactions.NewTransaction) (*transactions.TransactionInfo, *errors.ApiErrorResponse) {
+	fmt.Println("aquiiii")
 	if transaction.AccountID == 1212 {
 		err := errors.GetError(500, "Internal error")
-		return &err
+		return nil, &err
 	}
 
 	if transaction.AccountID == 99999 {
 		err := errors.GetError(404, "account with id: 99999 not found")
-		return &err
+		return nil, &err
 	}
 
-	return nil
+	tx := transactions.TransactionInfo{TransactionId: 1, Amount: transaction.Amount, OperationTypeId: transaction.OperationTypeId, AccountID: transaction.AccountID}
+
+	return &tx, nil
 }

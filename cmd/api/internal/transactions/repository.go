@@ -15,12 +15,12 @@ const INSERT_ACCOUNT = "INSERT INTO accounts (`document_number`) VALUES (?)"
 const INSERT_TRANSACTION = "INSERT INTO transactions (`account_id`, `operation_type_id`, `amount`, `event_date`) VALUES ( ?, ?, ?, NOW())"
 
 type AccountData struct {
-	AccountID      int64  `json:"account_id"`
-	DocumentNumber string `json:"document_number"`
+	AccountID      int64 `json:"account_id"`
+	DocumentNumber int64 `json:"document_number"`
 }
 
 type NewAccount struct {
-	DocumentNumber string `json:"document_number" binding:"required"`
+	DocumentNumber interface{} `json:"document_number" binding:"required"`
 }
 
 type NewTransaction struct {
@@ -29,16 +29,17 @@ type NewTransaction struct {
 	Amount          float64 `json:"amount" binding:"required"`
 }
 
+type TransactionInfo struct {
+	TransactionId   int64   `json:"transaction_id"`
+	AccountID       int64   `json:"account_id"`
+	OperationTypeId int64   `json:"operation_type_id"`
+	Amount          float64 `json:"amount"`
+}
+
 type OperationType int64
 
 type RepositoryImpl struct {
 	MysqlService mysql.Service
-}
-
-type Teste struct {
-	Id          int64   `json:"id"`
-	Description string  `json:"descriprion"`
-	Ammount     float64 `json:"ammount" binding:"required"`
 }
 
 func (repo *RepositoryImpl) GetAccountInfo(accountId int64) (accountInfo *AccountData, err *errors.ApiErrorResponse) {
@@ -87,26 +88,29 @@ func (repo *RepositoryImpl) CreateAccount(account NewAccount) (accountInfo *Acco
 	}
 
 	accNumber, _ := result.LastInsertId()
-	accountInfo = &AccountData{accNumber, account.DocumentNumber}
+	accountInfo = &AccountData{accNumber, account.DocumentNumber.(int64)}
 	return accountInfo, err
 }
 
-func (repo *RepositoryImpl) CreateTransaction(account NewTransaction) (err *errors.ApiErrorResponse) {
+func (repo *RepositoryImpl) CreateTransaction(account NewTransaction) (transaction *TransactionInfo, err *errors.ApiErrorResponse) {
 
 	params := []interface{}{}
 	params = append(params, account.AccountID)
 	params = append(params, account.OperationTypeId)
 	params = append(params, account.Amount)
 
-	_, dbError := repo.MysqlService.Insert(INSERT_TRANSACTION, params)
+	result, dbError := repo.MysqlService.Insert(INSERT_TRANSACTION, params)
 
 	if dbError != nil {
 		log.Println(dbError.Error())
 		err := errors.GetError(500, dbError.Error())
-		return &err
+		return nil, &err
 	}
 
-	return nil
+	txNumber, _ := result.LastInsertId()
+	transactionInfo := &TransactionInfo{AccountID: account.AccountID, OperationTypeId: account.OperationTypeId, Amount: account.Amount, TransactionId: txNumber}
+
+	return transactionInfo, nil
 }
 
 func (ot OperationType) IsValid() error {

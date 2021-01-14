@@ -30,10 +30,10 @@ func (s ServiceImpl) CreateAccount(account NewAccount) (accountInfo *AccountData
 	return accountInfo, nil
 }
 
-func (s ServiceImpl) CreateTransaction(transaction NewTransaction) (err *errors.ApiErrorResponse) {
+func (s ServiceImpl) CreateTransaction(transaction NewTransaction) (txInfo *TransactionInfo, err *errors.ApiErrorResponse) {
 	_, errAccountInvalid := s.Repo.GetAccountInfo(transaction.AccountID)
 	if errAccountInvalid != nil {
-		return errAccountInvalid
+		return nil, errAccountInvalid
 	}
 
 	switch transaction.OperationTypeId {
@@ -41,11 +41,11 @@ func (s ServiceImpl) CreateTransaction(transaction NewTransaction) (err *errors.
 		transaction.Amount = transaction.Amount - transaction.Amount*2
 	}
 
-	err = s.Repo.CreateTransaction(transaction)
+	txInfo, errCreated := s.Repo.CreateTransaction(transaction)
 
-	if err != nil {
-		return err
+	if errCreated != nil {
+		return nil, errCreated
 	}
 
-	return nil
+	return txInfo, nil
 }

@@ -1,7 +1,7 @@
 package accounts
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -41,6 +41,25 @@ func (handler *Handler) CreateAccount(c *gin.Context) {
 		return
 	}
 
+	switch accountData.DocumentNumber.(type) {
+	case string:
+		docNumber, err := strconv.ParseInt(accountData.DocumentNumber.(string), 10, 64)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Invalid document_number")
+			return
+		}
+		accountData.DocumentNumber = docNumber
+	default:
+		strDocNumber := fmt.Sprintf("%v", accountData.DocumentNumber)
+		docNumber, err := strconv.ParseInt(strDocNumber, 10, 64)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Invalid document_number")
+			return
+		}
+		accountData.DocumentNumber = docNumber
+
+	}
+
 	accountCreated, errAccount := handler.TransactionsService.CreateAccount(accountData)
 	if errAccount != nil {
 		c.JSON(errAccount.Status, errAccount)
@@ -68,19 +87,11 @@ func (handler *Handler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	errTransaction := handler.TransactionsService.CreateTransaction(transactionData)
+	transactionInfo, errTransaction := handler.TransactionsService.CreateTransaction(transactionData)
 	if errTransaction != nil {
 		c.JSON(errTransaction.Status, errTransaction)
 		return
 	}
 
-	c.JSON(http.StatusCreated, "created")
-}
-
-func (ot OperationType) IsValid() error {
-	switch ot {
-	case 1, 2, 3, 4:
-		return nil
-	}
-	return errors.New("Invalid operation_type_id")
+	c.JSON(http.StatusCreated, transactionInfo)
 }

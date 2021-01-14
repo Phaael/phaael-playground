@@ -15,3 +15,7 @@ func (s *ServiceImpl) Select(query string, args []interface{}) (*sql.Rows, error
 func (s *ServiceImpl) Insert(query string, args []interface{}) (sql.Result, error) {
 	return s.Repository.Insert(query, args)
 }
+
+func (s *ServiceImpl) Delete(query string, args []interface{}) (sql.Result, error) {
+	return s.Repository.Delete(query, args)
+}
