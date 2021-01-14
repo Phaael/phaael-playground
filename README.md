@@ -26,7 +26,7 @@
 1. Exemplos de chamadas a api:
    - criando uma conta:
     ```
-   curl -X POST http://localhost:8080/accounts -H 'cache-control: no-cache' -H 'postman-token: 7242df67-4cf8-5f4a-87ed-a14e417cf755' -d '{"document_number": "12345678900"}'
+   curl -X POST http://localhost:8080/accounts -d '{"document_number": "12345678900"}'
     ```
 
    - Criando uma transação:
