@@ -10,8 +10,8 @@ var (
 
 func init() {
 	DataBaseName = "appdb"
-	DBHost = "mysql"
-	DbUserName = "phaael"
-	PassDB = "123456"
+	DBHost = "localhost"
+	DbUserName = "root"
+	PassDB = "q1w2e3r4"
 	DBPort = "3306"
 }

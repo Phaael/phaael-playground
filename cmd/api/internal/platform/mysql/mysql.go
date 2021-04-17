@@ -8,6 +8,7 @@ type Service interface {
 	Select(query string, args []interface{}) (*sql.Rows, error)
 	Insert(query string, args []interface{}) (sql.Result, error)
 	Delete(query string, args []interface{}) (sql.Result, error)
+	Update(query string, args []interface{}) (sql.Result, error)
 }
 
 type Repository interface {
@@ -15,4 +16,5 @@ type Repository interface {
 	Select(query string, args []interface{}) (*sql.Rows, error)
 	Insert(query string, args []interface{}) (sql.Result, error)
 	Delete(query string, args []interface{}) (sql.Result, error)
+	Update(query string, args []interface{}) (sql.Result, error)
 }

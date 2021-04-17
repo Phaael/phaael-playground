@@ -306,3 +306,13 @@ func (a *TransactionsServiceMock) CreateTransaction(transaction transactions.New
 
 	return &tx, nil
 }
+
+func (a *TransactionsServiceMock) UpdateAccountInfo(newLimit float64, accountId int64) (err *errors.ApiErrorResponse) {
+
+	if accountId == 2 {
+		err := errors.GetError(500, "Internal error")
+		return &err
+	}
+
+	return nil
+}

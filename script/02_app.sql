@@ -3,6 +3,7 @@ use appdb;
 CREATE TABLE `appdb`.`accounts` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `document_number` BIGINT(20) NOT NULL,
+  `available_credit_limit` DECIMAL(10,2) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `account_id` (`id` ASC) VISIBLE);
 

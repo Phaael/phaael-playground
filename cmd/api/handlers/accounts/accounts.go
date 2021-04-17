@@ -60,6 +60,15 @@ func (handler *Handler) CreateAccount(c *gin.Context) {
 
 	}
 
+	if accountData.AvailableCreditLimit < 0 {
+		c.String(http.StatusBadRequest, "Invalid avaliable_credit_limit, must be > 0")
+		return
+	}
+
+	if accountData.AvailableCreditLimit <= 0 {
+		accountData.AvailableCreditLimit = transactions.AVALIABLE_CREDIT_LIMIT_DEFAULT
+	}
+
 	accountCreated, errAccount := handler.TransactionsService.CreateAccount(accountData)
 	if errAccount != nil {
 		c.JSON(errAccount.Status, errAccount)

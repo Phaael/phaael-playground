@@ -61,3 +61,8 @@ func (repo *RepositoryImpl) Delete(query string, args []interface{}) (sql.Result
 	result, err := DB.Exec(query, args...)
 	return result, err
 }
+
+func (repo *RepositoryImpl) Update(query string, args []interface{}) (sql.Result, error) {
+	result, err := DB.Exec(query, args...)
+	return result, err
+}
